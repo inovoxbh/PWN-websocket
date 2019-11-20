@@ -1,0 +1,65 @@
+<ul id="messages"></ul>
+
+<form id="comment-form">
+    <div>
+        <label for="author">Autor</label>
+        <input type="text" name="author" id="author" placeholder="Seu nome"/>
+    </div>
+
+    <div>
+        <label for="comment">Comentário</label>
+        <input type="text" name="comment" id="comment" placeholder="Seu comentário"/>
+    </div>
+
+    <div>
+        <button type="submit">Enviar Comentário</button>
+    </div>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script type="text/javascript">
+    const socket = io('http://localhost:3000');
+
+    //guarda o formulário em variável
+    const messageForm = document.getElementById('comment-form')
+
+    //guarda a lista (ul) em variável
+    const messagesList = document.getElementById('messages');
+
+    //função para renderização das mensagens enviadas
+    const renderMessage = (message) => {
+        //cria o elemento/item da lista
+        const element = document.createElement('li');
+
+        //define o html do elemento/item da lista
+        element.innerHTML = `<strong>${message.author}</strong>: ${message.comment}`;
+        
+        //inclui o elemento/item da lista na lista
+        messagesList.append(element);
+    }
+
+    //implementação do envio da mensagem
+    messageForm.onsubmit = function(event){
+        //previnir o recarregamento da página ao clicar no botão submit
+        event.preventDefault();
+
+        //obtém os dados do formulário
+        const author = document.getElementById('author').value;
+        const comment = document.getElementById('comment').value;
+        const message = {author,comment};
+
+        //adiona comentário à lista de mensagens do html
+        renderMessage(message);
+
+        //envio da msg ao servidor
+        socket.emit('sendMessage',message);
+    }
+
+    //evento para escutar as mensagens enviadas pelo servidor
+    socket.on('responseMessage', (response) => {
+        renderMessage(response);
+    });
+
+</script>
+
